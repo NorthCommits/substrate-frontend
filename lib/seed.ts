@@ -119,7 +119,7 @@ export async function getOrCreateApiKey(): Promise<string> {
   if (cached) return cached;
 
   // Try listing existing keys
-  let keys = await api.apiKeys.list(token).catch(() => [] as Awaited<ReturnType<typeof api.apiKeys.list>>);
+  const keys = await api.apiKeys.list(token).catch(() => [] as Awaited<ReturnType<typeof api.apiKeys.list>>);
 
   if (keys.length > 0) {
     // We can't get the raw key from the list — must create a new one if no raw key is cached

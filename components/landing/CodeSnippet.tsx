@@ -14,7 +14,6 @@ const tabs: { id: Tab; label: string }[] = [
 type Token = { type: "keyword" | "string" | "comment" | "fn" | "plain"; text: string };
 
 function tokenize(code: string): Token[] {
-  const keywords = /\b(import|requests|def|return|print|f)\b/g;
   const result: Token[] = [];
   let last = 0;
 

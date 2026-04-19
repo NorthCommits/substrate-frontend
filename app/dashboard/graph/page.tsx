@@ -19,7 +19,7 @@ import "reactflow/dist/style.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { ZoomIn, ZoomOut, Maximize2, RefreshCw, Network, X, Bot } from "lucide-react";
 import { useGraph } from "@/hooks/use-graph";
-import { Badge, StatusDot } from "@/components/ui/badge";
+
 import { formatRelativeTime } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

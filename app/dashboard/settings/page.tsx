@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { User, Key, Layers, AlertTriangle, Eye, EyeOff, Copy, Check, Plus, Trash2, Loader2 } from "lucide-react";
+import { User, Key, Layers, AlertTriangle, Eye, EyeOff, Copy, Check, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/auth";
 import { useApiKeys, useCreateApiKey, useDeleteApiKey, useWorkspace } from "@/hooks/useApiKeys";
@@ -9,7 +9,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime, formatDateShort } from "@/lib/utils";
 import { ApiKeyCreated } from "@/lib/api";
-import { useRouter } from "next/navigation";
+
 
 type Section = "profile" | "api-keys" | "workspace" | "danger";
 
