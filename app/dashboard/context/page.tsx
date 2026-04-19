@@ -141,7 +141,7 @@ export default function ContextPage() {
     status: filterStatus || undefined,
     producer_id: filterProducer || undefined,
   });
-  const { data: searchResults = [], isFetching: searching } = useContextSearch(activeSearch);
+  const { data: searchResults = [] } = useContextSearch(activeSearch);
   const displayContexts = activeSearch ? searchResults : contexts;
 
   const [pKey, setPKey] = useState("");
