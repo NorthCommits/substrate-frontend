@@ -56,7 +56,7 @@ export function LiveStats() {
   const { data } = useQuery({
     queryKey: ["public-stats"],
     queryFn: async () => {
-      const res = await fetch("https://substrate-backend.onrender.com/graph/public");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://substrate-backend.onrender.com"}/graph/public`);
       if (!res.ok) throw new Error("unavailable");
       return res.json() as Promise<{
         total_public_agents?: number;

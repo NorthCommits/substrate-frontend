@@ -1,4 +1,4 @@
-const BASE_URL = "https://substrate-backend.onrender.com";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://substrate-backend.onrender.com";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -109,17 +109,6 @@ export interface HealthResponse {
   status: string;
   database?: string;
   [key: string]: unknown;
-}
-
-export interface AuthRegister {
-  email: string;
-  password: string;
-  full_name?: string | null;
-}
-
-export interface AuthLogin {
-  email: string;
-  password: string;
 }
 
 export interface PublicGraphSummary {
@@ -268,25 +257,6 @@ export const api = {
         token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
       ),
     publicStats: () => apiFetch<PublicGraphSummary>("/graph/public"),
-  },
-
-  // ─── Auth ────────────────────────────────────────────────────────────────────
-
-  auth: {
-    register: (body: AuthRegister) =>
-      apiFetch<{ access_token: string; token_type: string; user: unknown }>("/auth/register", {
-        method: "POST",
-        body: JSON.stringify(body),
-      }),
-    login: (body: AuthLogin) =>
-      apiFetch<{ access_token: string; token_type: string; user: unknown }>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify(body),
-      }),
-    me: (token: string) =>
-      apiFetch<unknown>("/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
   },
 
   // ─── API Keys ─────────────────────────────────────────────────────────────────

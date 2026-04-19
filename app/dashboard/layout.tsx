@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { Header } from "@/components/dashboard/Header";
 import { useAuthStore } from "@/store/auth";
 import { useApiKeys } from "@/hooks/useApiKeys";
+import { supabase } from "@/lib/supabase";
+import { syncUserWithBackend } from "@/lib/auth";
 
 function AuthAndKeyProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -16,18 +18,40 @@ function AuthAndKeyProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!token) {
-      router.replace("/login");
-    }
-  }, [hydrated, token, router]);
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        router.replace("/login");
+        return;
+      }
+      localStorage.setItem("substrate_token", session.access_token);
+      try {
+        const user = await syncUserWithBackend(session.access_token);
+        localStorage.setItem("substrate_user", JSON.stringify(user));
+      } catch { /* backend sync failure is non-fatal */ }
+      hydrate();
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!session) {
+        router.replace("/login");
+        return;
+      }
+      localStorage.setItem("substrate_token", session.access_token);
+      if (event === "TOKEN_REFRESHED") {
+        try {
+          const user = await syncUserWithBackend(session.access_token);
+          localStorage.setItem("substrate_user", JSON.stringify(user));
+        } catch { /* non-fatal */ }
+        hydrate();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
 
   useEffect(() => {
-    const active = apiKeys?.find((k) => k.is_active);
-    if (active?.prefix) {
-      // prefix is not the full key — only a created key response has `.key`
-      // Store prefix as a signal that keys exist; full key set via create flow
-    }
-    // If we have a key stored from a previous session in localStorage, use it
     const stored = localStorage.getItem("substrate_active_api_key");
     if (stored) setActiveApiKey(stored);
   }, [apiKeys, setActiveApiKey]);

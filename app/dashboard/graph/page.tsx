@@ -228,7 +228,7 @@ export default function GraphPage() {
           <p className="text-sm text-slate-500 mt-0.5">Live view of your agents and context.</p>
         </div>
         <Link
-          href="https://substrate-backend.onrender.com/graph/public"
+          href={`${process.env.NEXT_PUBLIC_API_URL || "https://substrate-backend.onrender.com"}/graph/public`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors"

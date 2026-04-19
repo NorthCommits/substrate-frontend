@@ -317,7 +317,7 @@ function WorkspaceSection() {
   async function handleSave() {
     setSaving(true);
     try {
-      if (token) await fetch("https://substrate-backend.onrender.com/workspaces/me", {
+      if (token) await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://substrate-backend.onrender.com"}/workspaces/me`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ name: wsName, description: wsDesc }),

@@ -3,10 +3,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, CheckCircle2, Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { api } from "@/lib/api";
-import { User } from "@/types";
+import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { signIn } from "@/lib/auth";
 
 const bullets = [
   "Register your agents in seconds",
@@ -16,7 +14,6 @@ const bullets = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,9 +22,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (localStorage.getItem("substrate_token")) {
-      router.replace("/dashboard");
-    }
+    if (localStorage.getItem("substrate_token")) router.replace("/dashboard");
   }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -36,11 +31,17 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await api.auth.login({ email: email.trim(), password });
-      login(res.access_token, res.user as User);
+      await signIn(email.trim(), password);
       router.push("/dashboard");
-    } catch {
-      setError("Invalid email or password");
+    } catch (err) {
+      const msg = (err as { message?: string })?.message ?? "";
+      if (msg.includes("Email not confirmed")) {
+        setError("Please verify your email before logging in. Check your inbox.");
+      } else if (msg.includes("Invalid login credentials")) {
+        setError("Invalid email or password");
+      } else {
+        setError(msg || "Login failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,6 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
         className="relative w-full lg:w-1/2 min-h-screen flex flex-col bg-white px-12"
       >
-        {/* Back link + Logo */}
         <div className="absolute top-8 left-8 flex flex-col gap-2">
           <Link href="/" className="text-xs text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
             ← Back to home
@@ -66,7 +66,6 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Centered form */}
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full max-w-sm">
             <div className="mb-8">
@@ -95,9 +94,9 @@ export default function LoginPage() {
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-slate-700">Password</label>
-                  <button type="button" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
+                  <Link href="/forgot-password" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">
                     Forgot password?
-                  </button>
+                  </Link>
                 </div>
                 <div className="relative">
                   <input
@@ -143,7 +142,6 @@ export default function LoginPage() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className="hidden lg:flex lg:w-1/2 min-h-screen bg-indigo-600 flex-col justify-between p-12 relative overflow-hidden"
       >
-        {/* Dot grid overlay */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -151,7 +149,6 @@ export default function LoginPage() {
             backgroundSize: "24px 24px",
           }}
         />
-
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-16">
             <span className="h-6 w-6 bg-white/20 rounded-md inline-block" aria-hidden />
@@ -169,7 +166,6 @@ export default function LoginPage() {
             ))}
           </ul>
         </div>
-
         <div className="relative z-10 bg-indigo-700 rounded-lg p-5">
           <p className="text-indigo-100 text-sm italic leading-relaxed mb-3">
             &ldquo;Substrate changed how our agents communicate. Context flows instantly — no more starting from zero.&rdquo;

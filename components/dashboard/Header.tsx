@@ -13,6 +13,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
+import { signOut } from "@/lib/auth";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -43,7 +44,8 @@ export function Header() {
     return () => document.removeEventListener("mousedown", outside);
   }, []);
 
-  function handleLogout() {
+  async function handleLogout() {
+    await signOut();
     logout();
     router.push("/");
   }
