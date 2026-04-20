@@ -360,7 +360,7 @@ export default function DashboardPage() {
           <div className="divide-y divide-slate-50">
             {apiKeys.slice(0, 3).map((k) => (
               <div key={k.id} className="px-5 py-3 flex items-center gap-3">
-                <code className="text-xs text-slate-500 font-mono">{k.prefix}…</code>
+                <code className="text-xs text-slate-500 font-mono">{k.key_prefix}</code>
                 <span className="text-xs text-slate-900 font-medium flex-1">{k.name}</span>
                 <span className="text-xs text-slate-400">
                   {k.last_used_at ? `Used ${formatRelativeTime(k.last_used_at)}` : "Never used"}

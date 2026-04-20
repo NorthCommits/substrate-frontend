@@ -128,8 +128,8 @@ export async function getOrCreateApiKey(): Promise<string> {
 
   // Create a new demo key
   const created = await api.apiKeys.create(token, { name: "Demo Key" });
-  localStorage.setItem("substrate_active_api_key", created.key);
-  return created.key;
+  localStorage.setItem("substrate_active_api_key", created.raw_key);
+  return created.raw_key;
 }
 
 export async function resetAndReseed(

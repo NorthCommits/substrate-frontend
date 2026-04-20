@@ -150,7 +150,7 @@ function ApiKeysSection() {
 
   async function copyKey() {
     if (!newKey) return;
-    await navigator.clipboard.writeText(newKey.key);
+    await navigator.clipboard.writeText(newKey.raw_key);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -190,7 +190,7 @@ function ApiKeysSection() {
             Your API key — copy it now, it won&apos;t be shown again:
           </p>
           <div className="bg-white border border-emerald-200 rounded-lg px-4 py-3 font-mono text-sm text-slate-900 break-all mb-3">
-            {newKey.key}
+            {newKey.raw_key}
           </div>
           <div className="flex gap-2">
             <button
@@ -235,7 +235,7 @@ function ApiKeysSection() {
               {apiKeys.map((k) => (
                 <div key={k.id} className="px-5 py-3.5 grid grid-cols-[1fr_100px_80px_140px_120px_80px] gap-4 items-center hover:bg-slate-50 transition-colors">
                   <span className="text-sm font-medium text-slate-900">{k.name}</span>
-                  <code className="text-xs text-slate-500 font-mono">{k.prefix}…</code>
+                  <code className="text-xs text-slate-500 font-mono">{k.key_prefix}</code>
                   <span className="flex items-center gap-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${k.is_active ? "bg-emerald-500" : "bg-slate-300"}`} />
                     <span className={`text-xs ${k.is_active ? "text-emerald-700" : "text-slate-400"}`}>{k.is_active ? "Active" : "Revoked"}</span>

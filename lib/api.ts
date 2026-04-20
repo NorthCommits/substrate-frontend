@@ -140,14 +140,14 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 export interface ApiKey {
   id: string;
   name: string;
-  prefix: string;
+  key_prefix: string;
   is_active: boolean;
   last_used_at: string | null;
   created_at: string;
 }
 
-export interface ApiKeyCreated extends ApiKey {
-  key: string;
+export interface ApiKeyCreated extends Omit<ApiKey, "last_used_at"> {
+  raw_key: string;
 }
 
 export interface WorkspaceResponse {
