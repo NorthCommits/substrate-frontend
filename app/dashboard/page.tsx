@@ -127,7 +127,7 @@ function EmptyOnboarding() {
 }
 
 export default function DashboardPage() {
-  const { token, user } = useAuthStore();
+  const { user } = useAuthStore();
   const { data: agents = [], isLoading: agentsLoading } = useAgents();
   const { data: contexts = [], isLoading: ctxLoading } = useContextList();
   const { data: apiKeys = [] } = useApiKeys();
