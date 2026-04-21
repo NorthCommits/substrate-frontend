@@ -10,7 +10,7 @@ import { syncUserWithBackend } from "@/lib/auth";
 function AuthAndKeyProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { token, hydrated, hydrate, setActiveApiKey } = useAuthStore();
-  const { data: apiKeys } = useApiKeys(token);
+  const { data: apiKeys } = useApiKeys();
 
   useEffect(() => {
     hydrate();
@@ -52,7 +52,7 @@ function AuthAndKeyProvider({ children }: { children: React.ReactNode }) {
   }, [hydrated]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("substrate_active_api_key");
+    const stored = localStorage.getItem("substrate_api_key");
     if (stored) setActiveApiKey(stored);
   }, [apiKeys, setActiveApiKey]);
 

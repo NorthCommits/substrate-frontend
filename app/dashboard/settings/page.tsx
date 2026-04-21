@@ -8,7 +8,7 @@ import { useApiKeys, useCreateApiKey, useDeleteApiKey, useWorkspace } from "@/ho
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime, formatDateShort } from "@/lib/utils";
-import { ApiKeyCreated } from "@/lib/api";
+import { api, ApiKeyCreated } from "@/lib/api";
 
 
 type Section = "profile" | "api-keys" | "workspace" | "danger";
@@ -116,10 +116,9 @@ function PasswordField({ label }: { label: string }) {
 // ─── API Keys ─────────────────────────────────────────────────────────────────
 
 function ApiKeysSection() {
-  const { token } = useAuthStore();
-  const { data: apiKeys = [], isLoading } = useApiKeys(token);
-  const createKey = useCreateApiKey(token);
-  const deleteKey = useDeleteApiKey(token);
+  const { data: apiKeys = [], isLoading } = useApiKeys();
+  const createKey = useCreateApiKey();
+  const deleteKey = useDeleteApiKey();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [keyName, setKeyName] = useState("");
@@ -132,6 +131,7 @@ function ApiKeysSection() {
     if (!keyName.trim()) { toast.error("Key name is required"); return; }
     try {
       const created = await createKey.mutateAsync({ name: keyName.trim() });
+      localStorage.setItem("substrate_api_key", created.raw_key);
       setNewKey(created);
       setKeyName("");
       setCreateOpen(false);
@@ -302,8 +302,7 @@ function ApiKeysSection() {
 // ─── Workspace ────────────────────────────────────────────────────────────────
 
 function WorkspaceSection() {
-  const { token } = useAuthStore();
-  const { data: workspace } = useWorkspace(token);
+  const { data: workspace } = useWorkspace();
   const [wsName, setWsName] = useState("");
   const [wsDesc, setWsDesc] = useState("");
   const [saving, setSaving] = useState(false);
@@ -317,11 +316,7 @@ function WorkspaceSection() {
   async function handleSave() {
     setSaving(true);
     try {
-      if (token) await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://substrate-backend.onrender.com"}/workspaces/me`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ name: wsName, description: wsDesc }),
-      });
+      await api.workspace.update({ name: wsName, description: wsDesc });
       toast.success("Workspace updated");
     } catch { toast.error("Failed to update workspace"); }
     finally { setSaving(false); }

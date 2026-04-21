@@ -130,7 +130,7 @@ export default function DashboardPage() {
   const { token, user } = useAuthStore();
   const { data: agents = [], isLoading: agentsLoading } = useAgents();
   const { data: contexts = [], isLoading: ctxLoading } = useContextList();
-  const { data: apiKeys = [] } = useApiKeys(token);
+  const { data: apiKeys = [] } = useApiKeys();
 
   const { data: subscriptions = [] } = useQuery({
     queryKey: ["subscriptions-all", agents.map((a) => a.id).join(",")],

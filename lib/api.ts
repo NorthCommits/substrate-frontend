@@ -117,6 +117,18 @@ export interface PublicGraphSummary {
   active_subscriptions?: number;
 }
 
+// ─── Auth helpers ─────────────────────────────────────────────────────────────
+
+function getApiKey(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  return localStorage.getItem("substrate_api_key") ?? undefined;
+}
+
+function getToken(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  return localStorage.getItem("substrate_token") ?? undefined;
+}
+
 // ─── Fetch helper ─────────────────────────────────────────────────────────────
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -183,26 +195,26 @@ export const api = {
   // ─── Agents ─────────────────────────────────────────────────────────────────
 
   agents: {
-    list: (apiKey?: string) =>
-      apiFetch<AgentResponse[]>("/agents/", apiKey ? { headers: { "X-API-Key": apiKey } } : undefined),
-    get: (id: string, apiKey?: string) =>
-      apiFetch<AgentResponse>(`/agents/${id}`, apiKey ? { headers: { "X-API-Key": apiKey } } : undefined),
-    create: (body: AgentCreate, apiKey?: string) =>
+    list: () =>
+      apiFetch<AgentResponse[]>("/agents/", { headers: { "X-API-Key": getApiKey()! } }),
+    get: (id: string) =>
+      apiFetch<AgentResponse>(`/agents/${id}`, { headers: { "X-API-Key": getApiKey()! } }),
+    create: (body: AgentCreate) =>
       apiFetch<AgentResponse>("/agents/", {
         method: "POST",
         body: JSON.stringify(body),
-        headers: apiKey ? { "X-API-Key": apiKey } : undefined,
+        headers: { "X-API-Key": getApiKey()! },
       }),
-    update: (id: string, body: AgentUpdate, apiKey?: string) =>
+    update: (id: string, body: AgentUpdate) =>
       apiFetch<AgentResponse>(`/agents/${id}`, {
         method: "PATCH",
         body: JSON.stringify(body),
-        headers: apiKey ? { "X-API-Key": apiKey } : undefined,
+        headers: { "X-API-Key": getApiKey()! },
       }),
-    delete: (id: string, apiKey?: string) =>
+    delete: (id: string) =>
       apiFetch<void>(`/agents/${id}`, {
         method: "DELETE",
-        headers: apiKey ? { "X-API-Key": apiKey } : undefined,
+        headers: { "X-API-Key": getApiKey()! },
       }),
   },
 
@@ -219,93 +231,96 @@ export const api = {
       if (params?.status) q.set("status", params.status);
       if (params?.producer_id) q.set("producer_id", params.producer_id);
       const qs = q.toString();
-      return apiFetch<ContextSummary[]>(`/context/${qs ? `?${qs}` : ""}`);
+      return apiFetch<ContextSummary[]>(`/context/${qs ? `?${qs}` : ""}`, {
+        headers: { "X-API-Key": getApiKey()! },
+      });
     },
     search: (query: string, threshold = 0.75, top_k = 5) => {
       const q = new URLSearchParams({ query, threshold: String(threshold), top_k: String(top_k) });
-      return apiFetch<ContextSummary[]>(`/context/search?${q}`);
+      return apiFetch<ContextSummary[]>(`/context/search?${q}`, {
+        headers: { "X-API-Key": getApiKey()! },
+      });
     },
-    get: (id: string) => apiFetch<ContextResponse>(`/context/${id}`),
-    publish: (body: ContextPublish, apiKey?: string) =>
-      apiFetch<ContextResponse>(
-        `/context/publish?agent_id=${body.producer_id}`,
-        {
-          method: "POST",
-          body: JSON.stringify(body),
-          headers: apiKey ? { "X-API-Key": apiKey } : undefined,
-        }
-      ),
-    updateStatus: (id: string, agentId: string, body: ContextStatusUpdate, apiKey?: string) =>
+    get: (id: string) =>
+      apiFetch<ContextResponse>(`/context/${id}`, { headers: { "X-API-Key": getApiKey()! } }),
+    publish: (body: ContextPublish) =>
+      apiFetch<ContextResponse>(`/context/publish?agent_id=${body.producer_id}`, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: { "X-API-Key": getApiKey()! },
+      }),
+    updateStatus: (id: string, agentId: string, body: ContextStatusUpdate) =>
       apiFetch<ContextResponse>(`/context/${id}/status?agent_id=${agentId}`, {
         method: "PATCH",
         body: JSON.stringify(body),
-        headers: apiKey ? { "X-API-Key": apiKey } : undefined,
+        headers: { "X-API-Key": getApiKey()! },
       }),
-    lineage: (id: string, apiKey?: string) =>
-      apiFetch<LineageResponse[]>(
-        `/context/${id}/lineage`,
-        apiKey ? { headers: { "X-API-Key": apiKey } } : undefined
-      ),
+    lineage: (id: string) =>
+      apiFetch<LineageResponse[]>(`/context/${id}/lineage`, {
+        headers: { "X-API-Key": getApiKey()! },
+      }),
   },
 
   // ─── Graph ───────────────────────────────────────────────────────────────────
 
   graph: {
-    get: (token?: string) =>
-      apiFetch<GraphResponse>(
-        "/graph/",
-        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
-      ),
+    get: () =>
+      apiFetch<GraphResponse>("/graph/", { headers: { "X-API-Key": getApiKey()! } }),
     publicStats: () => apiFetch<PublicGraphSummary>("/graph/public"),
   },
 
   // ─── API Keys ─────────────────────────────────────────────────────────────────
 
   apiKeys: {
-    list: (token: string) =>
-      apiFetch<ApiKey[]>("/api-keys/", { headers: bearerHeaders(token) }),
-    create: (token: string, body: { name: string }) =>
+    list: () =>
+      apiFetch<ApiKey[]>("/api-keys/", { headers: bearerHeaders(getToken()!) }),
+    create: (body: { name: string }) =>
       apiFetch<ApiKeyCreated>("/api-keys/", {
         method: "POST",
         body: JSON.stringify(body),
-        headers: bearerHeaders(token),
+        headers: bearerHeaders(getToken()!),
       }),
-    delete: (token: string, id: string) =>
-      apiFetch<void>(`/api-keys/${id}`, { method: "DELETE", headers: bearerHeaders(token) }),
+    delete: (id: string) =>
+      apiFetch<void>(`/api-keys/${id}`, { method: "DELETE", headers: bearerHeaders(getToken()!) }),
   },
 
   // ─── Workspace ────────────────────────────────────────────────────────────────
 
   workspace: {
-    me: (token: string) =>
-      apiFetch<WorkspaceResponse>("/workspaces/me", { headers: bearerHeaders(token) }),
-    update: (token: string, body: WorkspaceUpdate) =>
+    me: () =>
+      apiFetch<WorkspaceResponse>("/workspaces/me", { headers: bearerHeaders(getToken()!) }),
+    update: (body: WorkspaceUpdate) =>
       apiFetch<WorkspaceResponse>("/workspaces/me", {
         method: "PATCH",
         body: JSON.stringify(body),
-        headers: bearerHeaders(token),
+        headers: bearerHeaders(getToken()!),
       }),
   },
 
   // ─── Auth/me ──────────────────────────────────────────────────────────────────
 
   user: {
-    me: (token: string) =>
-      apiFetch<unknown>("/auth/me", { headers: bearerHeaders(token) }),
+    me: () =>
+      apiFetch<unknown>("/auth/me", { headers: bearerHeaders(getToken()!) }),
   },
 
   // ─── Subscriptions ───────────────────────────────────────────────────────────
 
   subscriptions: {
-    create: (body: SubscriptionCreate, apiKey?: string) =>
+    create: (body: SubscriptionCreate) =>
       apiFetch<SubscriptionResponse>("/subscriptions/", {
         method: "POST",
         body: JSON.stringify(body),
-        headers: apiKey ? { "X-API-Key": apiKey } : undefined,
+        headers: { "X-API-Key": getApiKey()! },
       }),
     forAgent: (agentId: string) =>
-      apiFetch<SubscriptionResponse[]>(`/subscriptions/agent/${agentId}`),
+      apiFetch<SubscriptionResponse[]>(`/subscriptions/agent/${agentId}`, {
+        headers: { "X-API-Key": getApiKey()! },
+      }),
     delete: (id: string) =>
-      apiFetch<void>(`/subscriptions/${id}`, { method: "DELETE" }),
+      apiFetch<void>(`/subscriptions/${id}`, {
+        method: "DELETE",
+        headers: { "X-API-Key": getApiKey()! },
+      }),
   },
 };

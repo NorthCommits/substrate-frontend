@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, AgentCreate, AgentUpdate } from "@/lib/api";
 
-export function useAgents(apiKey?: string) {
+export function useAgents() {
   return useQuery({
     queryKey: ["agents"],
-    queryFn: () => api.agents.list(apiKey),
+    queryFn: () => api.agents.list(),
   });
 }
 

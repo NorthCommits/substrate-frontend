@@ -41,7 +41,7 @@ export async function signOut() {
   await supabase.auth.signOut();
   localStorage.removeItem("substrate_token");
   localStorage.removeItem("substrate_user");
-  localStorage.removeItem("substrate_active_api_key");
+  localStorage.removeItem("substrate_api_key");
 }
 
 export async function getSession() {
